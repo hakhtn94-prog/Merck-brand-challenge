@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Merck Brand Challenge</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f5f7fb;
+    text-align: center;
+    padding: 20px;
+}
+
+.header {
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    color: #0b3d91;
+    margin-bottom: 5px;
+}
+
+.banner {
+    display: inline-block;
+    background: #0b3d91;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.question {
+    font-size: 18px;
+    margin: 15px 0;
+}
+
+.hint {
+    color: #0077cc;
+    margin-bottom: 15px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.slot, .box {
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+}
+
+.slot {
+    border: 2px dashed #aaa;
+    background: white;
+}
+
+.fixed {
+    background: #c8f7c5;
+    border: 2px solid green;
+    font-weight: bold;
+}
+
+.box {
+    background: #e8f0ff;
+    border: 2px solid #333;
+    cursor: grab;
+    user-select: none;
+}
+
+button {
+    margin-top: 10px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #2196f3;
+    color: white;
+}
+
+#status {
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* reward */
+#reward {
+    display: none;
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background: rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+}
+
+#rewardBox {
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    width:320px;
+}
+
+.code {
+    font-size: 20px;
+    font-weight: bold;
+    color: #d32f2f;
+    margin-top: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>🎮 Merck Brand Challenge</h1>
+    <div class="banner">
+        🎁 Đổi quà hấp dẫn tại Booth D3 - Merck
+    </div>
+</div>
+
+<div id="game"></div>
+
+<button onclick="check()">✔ Kiểm tra</button>
+
+<div id="status"></div>
+
+<!-- REWARD -->
+<div id="reward">
+    <div id="rewardBox">
+        <h2>🎉 HOÀN THÀNH!</h2>
+
+        <p>Bạn đã hoàn thành tất cả câu hỏi</p>
+
+        <div class="code" id="code"></div>
+
+        <p>
+            📍 Hãy đến <b>Booth D3 - Merck</b><br>
+            tại sự kiện để nhận quà 🎁
+        </p>
+    </div>
+</div>
+
+<script>
+const questions = [
+{
+    clue: "Đây là brand chuyên cho các sản phẩm phân tích, chất chuẩn",
+    answer: "SUPELCO",
+    hint: "S",
+    letters: ["U","P","E","L","C","O"]
+},
+{
+    clue: "Đây là brand chuyên cho các sản phẩm dùng cho nghiên cứu R&D",
+    answer: "SIGMAALDRICH",
+    hint: "S",
+    letters: ["I","G","M","A","A","L","D","R","I","C","H"]
+},
+{
+    clue: "Đây là brand chuyên cho màng lọc, chuẩn bị mẫu",
+    answer: "MILLIPORE",
+    hint: "M",
+    letters: ["I","L","L","I","P","O","R","E"]
+},
+{
+    clue: "Đây là brand chuyên cho máy lọc nước",
+    answer: "MILLIQ",
+    hint: "M",
+    letters: ["I","L","L","I","Q"]
+}
+];
+
+let current = 0;
+let dragged = null;
+
+/* =========================
+   🔒 CHẶN CHƠI 1 LẦN DUY NHẤT
+========================= */
+if (localStorage.getItem("merck_played") === "1") {
+    document.body.innerHTML = `
+        <div style="text-align:center; font-family:Arial; padding:50px;">
+            <h2>🚫 Bạn đã tham gia rồi</h2>
+            <p>Game chỉ được chơi 1 lần duy nhất</p>
+            <p>📍 Vui lòng đến Booth D3 - Merck để nhận quà</p>
+        </div>
+    `;
+} else {
+    render();
+}
+
+function render() {
+    const q = questions[current];
+
+    let html = `
+        <div class="question">❓ ${q.clue}</div>
+        <div class="hint">💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b></div>
+
+        <div class="container" id="slots">
+            <div class="slot fixed">${q.hint}</div>
+    `;
+
+    for (let i = 1; i < q.answer.length; i++) {
+        html += `<div class="slot" ondrop="drop(event)" ondragover="allowDrop(event)"></div>`;
+    }
+
+    html += `</div><div class="container">`;
+
+    let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach(l => {
+        html += `<div class="box" draggable="true" ondragstart="drag(event)">${l}</div>`;
+    });
+
+    html += `</div>`;
+
+    document.getElementById("game").innerHTML = html;
+    document.getElementById("status").innerText = "";
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    dragged = ev.target;
+}
+
+function drop(ev) {
+    ev.preventDefault();
+
+    if (ev.target.innerText !== "") return;
+
+    ev.target.appendChild(dragged);
+}
+
+function check() {
+    const q = questions[current];
+    const slots = document.querySelectorAll(".slot");
+
+    let ans = "";
+    slots.forEach(s => ans += s.innerText);
+
+    if (ans === q.answer) {
+        current++;
+
+        if (current < questions.length) {
+            render();
+        } else {
+            showReward();
+        }
+
+    } else {
+        document.getElementById("status").innerText = "❌ Sai rồi! Thử lại";
+        document.getElementById("status").style.color = "red";
+    }
+}
+
+function showReward() {
+    const code = "MERCK-D3-" + Math.random().toString(36).substring(2,8).toUpperCase();
+
+    document.getElementById("code").innerText = "Mã: " + code;
+    document.getElementById("reward").style.display = "flex";
+    document.getElementById("game").innerHTML = "";
+
+    /* =========================
+       🔒 KHÓA NGƯỜI CHƠI SAU KHI HOÀN THÀNH
+    ========================== */
+    localStorage.setItem("merck_played", "1");
+}
+</script>
+
+</body>
+</html>

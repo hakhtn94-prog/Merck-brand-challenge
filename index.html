@@ -205,14 +205,10 @@ let selected = null;
 
 render();
 
-/* RESET SLOT PROPER */
-function resetSelection() {
-    selected = null;
-}
-
-/* RENDER */
+/* RESET */
 function render() {
-    resetSelection();
+
+    selected = null;
 
     const q = questions[current];
 
@@ -233,7 +229,7 @@ function render() {
     let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
 
     shuffled.forEach(l => {
-        html += `<div class="box" onclick="select(this)">${l}</div>`;
+        html += `<div class="box" data-used="0" onclick="select(this)">${l}</div>`;
     });
 
     html += `</div>`;
@@ -248,18 +244,18 @@ function select(el) {
     el.classList.add("selected");
 }
 
-/* PLACE + RETURN FIXED */
+/* PLACE / RETURN FIX (KHÔNG DÙNG VISIBILITY NỮA) */
 function toggleSlot(slot) {
 
-    const boxes = document.querySelectorAll(".box");
-
-    // trả ký tự về
     if (slot.innerText !== "") {
-        boxes.forEach(b => {
-            if (b.innerText === slot.innerText && b.style.visibility === "hidden") {
-                b.style.visibility = "visible";
+
+        document.querySelectorAll(".box").forEach(b => {
+            if (b.innerText === slot.innerText && b.dataset.used === "1") {
+                b.dataset.used = "0";
+                b.style.opacity = "1";
             }
         });
+
         slot.innerText = "";
         return;
     }
@@ -267,12 +263,13 @@ function toggleSlot(slot) {
     if (!selected) return;
 
     slot.innerText = selected.innerText;
-    selected.style.visibility = "hidden";
+    selected.dataset.used = "1";
+    selected.style.opacity = "0.3";
     selected.classList.remove("selected");
     selected = null;
 }
 
-/* CHECK FIXED */
+/* CHECK */
 function check() {
 
     const q = questions[current];
@@ -317,7 +314,7 @@ function showReward() {
     document.getElementById("reward").style.display = "flex";
 }
 
-/* RESTART FIX FULL RESET */
+/* RESTART */
 function restart() {
     current = 0;
     selected = null;

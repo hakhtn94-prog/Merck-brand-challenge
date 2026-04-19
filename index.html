@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -12,16 +11,15 @@ body {
     font-family: Arial;
     background: #f5f7fb;
     text-align: center;
-    overflow-x: hidden;
 }
 
-/* FULL SCREEN APP STYLE */
-.container-app {
+/* FULL SCREEN */
+.wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 15px;
+    padding: 12px;
 }
 
 /* HEADER */
@@ -29,45 +27,53 @@ body {
     width: 100%;
     background: #0b3d91;
     color: white;
-    padding: 12px;
+    padding: 12px 10px;
 }
 
-.logo {
-    height: 40px;
-    margin-bottom: 5px;
+.header h1 {
+    margin: 5px 0;
+    font-size: 20px;
 }
 
 /* BANNER */
 .banner {
+    display: inline-block;
     background: #ffcc00;
     color: #000;
-    padding: 8px;
+    padding: 6px 12px;
     border-radius: 8px;
-    margin-top: 8px;
+    font-size: 13px;
     font-weight: bold;
 }
 
 /* GUIDE */
 .guide {
     background: #fff3cd;
+    border: 1px solid #ffeeba;
     padding: 10px;
     border-radius: 10px;
     margin: 10px;
     font-size: 14px;
 }
 
-/* GAME */
+/* QUESTION */
 .question {
-    font-size: 18px;
+    font-size: 17px;
     margin: 10px;
 }
 
+.hint {
+    color: #0077cc;
+    margin-bottom: 10px;
+}
+
+/* GAME */
 .container {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 10px;
+    margin: 10px 0;
 }
 
 .slot, .box {
@@ -95,6 +101,7 @@ body {
     background: #e8f0ff;
     border: 2px solid #333;
     cursor: pointer;
+    user-select: none;
 }
 
 .box.selected {
@@ -113,7 +120,7 @@ button {
 
 /* STATUS */
 #status {
-    margin: 10px;
+    margin-top: 10px;
     font-weight: bold;
 }
 
@@ -133,42 +140,22 @@ button {
     padding:25px;
     border-radius:12px;
     width:300px;
-    text-align:center;
-}
-
-/* CONFETTI */
-.confetti {
-    position: fixed;
-    width: 8px;
-    height: 8px;
-    background: red;
-    top: -10px;
-    animation: fall 3s linear infinite;
-}
-
-@keyframes fall {
-    to { transform: translateY(100vh) rotate(360deg); }
 }
 </style>
-
 </head>
 
 <body>
 
-<div class="container-app">
-
-<!-- HEADER -->
+<div class="wrapper">
 
 <div class="header">
-    <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Merck_Logo.svg">
-    <div>🎮 Merck Brand Challenge</div>
+    <h1>🎮 Merck Brand Challenge</h1>
     <div class="banner">🎁 Nhận quà hấp dẫn tại Booth D3 - Merck</div>
 </div>
 
-<!-- GUIDE -->
-
 <div class="guide">
-👉 Cách chơi: Chạm vào chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
+👉 Cách chơi:<br>
+Chạm vào chữ cái → chọn → chạm vào ô trống để sắp xếp đúng đáp án
 </div>
 
 <div id="game"></div>
@@ -179,22 +166,15 @@ button {
 
 </div>
 
-<!-- REWARD -->
-
 <div id="reward">
     <div id="rewardBox">
-        <h2>🎉 CHÚC MỪNG!</h2>
+        <h2>🎉 HOÀN THÀNH!</h2>
         <div id="code" style="font-size:20px;color:red;font-weight:bold;"></div>
         <p>📍 Đến Booth D3 để nhận quà</p>
     </div>
 </div>
 
-<!-- SOUND -->
-
-<audio id="okSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio> <audio id="failSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio> <audio id="winSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
-
 <script>
-
 const questions = [
 {
     clue: "phân tích, chất chuẩn",
@@ -207,6 +187,18 @@ const questions = [
     answer: "SIGMAALDRICH",
     hint: "S",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
+},
+{
+    clue: "màng lọc, chuẩn bị mẫu",
+    answer: "MILLIPORE",
+    hint: "M",
+    letters: ["I","L","L","I","P","O","R","E"]
+},
+{
+    clue: "máy lọc nước",
+    answer: "MILLIQ",
+    hint: "M",
+    letters: ["I","L","L","I","Q"]
 }
 ];
 
@@ -214,7 +206,7 @@ let current = 0;
 let selected = null;
 
 if (localStorage.getItem("merck_played") === "1") {
-    document.body.innerHTML = "<h2>🚫 Bạn đã chơi rồi</h2>";
+    document.body.innerHTML = "<h2 style='text-align:center'>🚫 Bạn đã chơi rồi</h2>";
 } else {
     render();
 }
@@ -261,9 +253,6 @@ function place(slot) {
 }
 
 function check() {
-    const okSound = document.getElementById("okSound");
-    const failSound = document.getElementById("failSound");
-
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
 
@@ -271,40 +260,23 @@ function check() {
     slots.forEach(s => ans += s.innerText);
 
     if (ans === q.answer) {
-        okSound.play();
         current++;
-
         if (current < questions.length) {
             render();
         } else {
             showReward();
         }
     } else {
-        failSound.play();
         document.getElementById("status").innerText = "❌ Sai rồi!";
     }
 }
 
 function showReward() {
-    document.getElementById("winSound").play();
-
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
     document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
-
     localStorage.setItem("merck_played", "1");
-
-    // CONFETTI
-    for (let i = 0; i < 30; i++) {
-        let c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "vw";
-        c.style.background = ["red","blue","yellow","green"][Math.floor(Math.random()*4)];
-        c.style.animationDuration = (2 + Math.random()*3) + "s";
-        document.body.appendChild(c);
-    }
 }
-
 </script>
 
 </body>

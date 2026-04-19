@@ -73,18 +73,21 @@ body {
 .slot {
     border: 2px dashed #aaa;
     background: white;
+    cursor: pointer;
 }
 
 .box {
     background: #e8f0ff;
     border: 2px solid #333;
     cursor: pointer;
+    user-select: none;
 }
 
 .box.selected {
     background: #ffcc80;
 }
 
+/* BUTTON */
 button {
     padding: 12px 18px;
     margin: 5px;
@@ -100,7 +103,7 @@ button {
     font-weight: bold;
 }
 
-/* REWARD */
+/* REWARD OVERLAY */
 #reward {
     display: none;
     position: fixed;
@@ -114,11 +117,12 @@ button {
     z-index: 9999;
 }
 
+/* BOX TRẮNG CHIẾN THẮNG */
 #rewardBox {
     background: white;
     padding: 25px;
     border-radius: 12px;
-    width: 300px;
+    width: 320px;
     max-width: 90%;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -148,7 +152,7 @@ button {
 
 <div class="header">
     <h1>🎮 Merck Brand Challenge</h1>
-    <div class="banner">🎁 Nhận quà hấp dẫn tại Booth D3 - Merck</div>
+    <div class="banner">🎁 Nhận quà tại Booth D3 - Merck</div>
 </div>
 
 <div class="guide">
@@ -168,6 +172,7 @@ button {
 <div id="reward">
     <div id="rewardBox">
         <h2>🎉 CHÚC MỪNG!</h2>
+        <p>Bạn đã hoàn thành thử thách</p>
         <p>Mã nhận thưởng:</p>
         <div id="code" style="font-size:22px;color:red;font-weight:bold;margin:10px 0;"></div>
         <p>📍 Mang mã đến <b>Booth D3 - Merck</b> để nhận quà 🎁</p>
@@ -215,10 +220,13 @@ function render() {
 
     let html = `
         <div class="question">❓ ${q.desc}</div>
-        <div class="hint">💡 Gợi ý: <b>${q.hint}</b></div>
+
+        <div class="hint">
+            💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b>
+        </div>
 
         <div class="container">
-            <div class="slot">${q.hint}</div>
+            <div class="slot fixed">${q.hint}</div>
     `;
 
     for (let i = 1; i < q.answer.length; i++) {
@@ -245,11 +253,14 @@ function select(el) {
     el.classList.add("selected");
 }
 
-/* ================= PLACE / RETURN ================= */
+/* ================= PLACE / RETURN FIX ================= */
 function toggleSlot(slot) {
 
+    const boxes = document.querySelectorAll(".box");
+
+    // nếu slot có chữ → trả về kho
     if (slot.innerText !== "") {
-        document.querySelectorAll(".box").forEach(b => {
+        boxes.forEach(b => {
             if (b.innerText === slot.innerText) {
                 b.style.display = "flex";
             }
@@ -258,6 +269,7 @@ function toggleSlot(slot) {
         return;
     }
 
+    // đặt chữ mới
     if (!selected) return;
 
     slot.innerText = selected.innerText;
@@ -303,6 +315,7 @@ function confetti() {
 /* ================= REWARD ================= */
 function showReward() {
     confetti();
+
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
 
     document.getElementById("code").innerText = code;

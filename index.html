@@ -1,7 +1,9 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merck Brand Challenge</title>
 
 <style>
@@ -12,13 +14,8 @@ body {
     padding: 20px;
 }
 
-.header {
-    margin-bottom: 15px;
-}
-
 .header h1 {
     color: #0b3d91;
-    margin-bottom: 5px;
 }
 
 .banner {
@@ -28,13 +25,7 @@ body {
     padding: 8px 14px;
     border-radius: 8px;
     font-size: 14px;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    margin-bottom: 10px;
 }
 
 .question {
@@ -52,7 +43,6 @@ body {
     justify-content: center;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 10px 0;
 }
 
 .slot, .box {
@@ -79,18 +69,21 @@ body {
 .box {
     background: #e8f0ff;
     border: 2px solid #333;
-    cursor: grab;
-    user-select: none;
+    cursor: pointer;
+}
+
+.box.selected {
+    background: #ffcc80;
 }
 
 button {
     margin-top: 10px;
-    padding: 8px 14px;
+    padding: 10px 16px;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
     background: #2196f3;
     color: white;
+    font-size: 16px;
 }
 
 #status {
@@ -113,7 +106,7 @@ button {
     background:white;
     padding:25px;
     border-radius:10px;
-    width:320px;
+    width:300px;
 }
 
 .code {
@@ -123,16 +116,14 @@ button {
     margin-top: 10px;
 }
 </style>
+
 </head>
 
 <body>
 
-<!-- HEADER -->
 <div class="header">
     <h1>🎮 Merck Brand Challenge</h1>
-    <div class="banner">
-        🎁 Đổi quà hấp dẫn tại Booth D3 - Merck
-    </div>
+    <div class="banner">🎁 Nhận quà tại Booth D3</div>
 </div>
 
 <div id="game"></div>
@@ -141,64 +132,34 @@ button {
 
 <div id="status"></div>
 
-<!-- REWARD -->
 <div id="reward">
     <div id="rewardBox">
         <h2>🎉 HOÀN THÀNH!</h2>
-
-        <p>Bạn đã hoàn thành tất cả câu hỏi</p>
-
         <div class="code" id="code"></div>
-
-        <p>
-            📍 Hãy đến <b>Booth D3 - Merck</b><br>
-            tại sự kiện để nhận quà 🎁
-        </p>
     </div>
 </div>
 
 <script>
 const questions = [
 {
-    clue: "Đây là brand chuyên cho các sản phẩm phân tích, chất chuẩn",
+    clue: "Brand cho phân tích, chất chuẩn",
     answer: "SUPELCO",
     hint: "S",
     letters: ["U","P","E","L","C","O"]
 },
 {
-    clue: "Đây là brand chuyên cho các sản phẩm dùng cho nghiên cứu R&D",
+    clue: "Brand cho R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
-},
-{
-    clue: "Đây là brand chuyên cho màng lọc, chuẩn bị mẫu",
-    answer: "MILLIPORE",
-    hint: "M",
-    letters: ["I","L","L","I","P","O","R","E"]
-},
-{
-    clue: "Đây là brand chuyên cho máy lọc nước",
-    answer: "MILLIQ",
-    hint: "M",
-    letters: ["I","L","L","I","Q"]
 }
 ];
 
 let current = 0;
-let dragged = null;
+let selected = null;
 
-/* =========================
-   🔒 CHẶN CHƠI 1 LẦN DUY NHẤT
-========================= */
 if (localStorage.getItem("merck_played") === "1") {
-    document.body.innerHTML = `
-        <div style="text-align:center; font-family:Arial; padding:50px;">
-            <h2>🚫 Bạn đã tham gia rồi</h2>
-            <p>Game chỉ được chơi 1 lần duy nhất</p>
-            <p>📍 Vui lòng đến Booth D3 - Merck để nhận quà</p>
-        </div>
-    `;
+    document.body.innerHTML = "<h2>🚫 Bạn đã chơi rồi</h2>";
 } else {
     render();
 }
@@ -207,15 +168,15 @@ function render() {
     const q = questions[current];
 
     let html = `
-        <div class="question">❓ ${q.clue}</div>
-        <div class="hint">💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b></div>
+        <div class="question">${q.clue}</div>
+        <div class="hint">Gợi ý: ${q.hint}</div>
 
-        <div class="container" id="slots">
+        <div class="container">
             <div class="slot fixed">${q.hint}</div>
     `;
 
     for (let i = 1; i < q.answer.length; i++) {
-        html += `<div class="slot" ondrop="drop(event)" ondragover="allowDrop(event)"></div>`;
+        html += `<div class="slot" onclick="place(this)"></div>`;
     }
 
     html += `</div><div class="container">`;
@@ -223,7 +184,7 @@ function render() {
     let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
 
     shuffled.forEach(l => {
-        html += `<div class="box" draggable="true" ondragstart="drag(event)">${l}</div>`;
+        html += `<div class="box" onclick="select(this)">${l}</div>`;
     });
 
     html += `</div>`;
@@ -232,20 +193,18 @@ function render() {
     document.getElementById("status").innerText = "";
 }
 
-function allowDrop(ev) {
-    ev.preventDefault();
+function select(el) {
+    document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
+    selected = el;
+    el.classList.add("selected");
 }
 
-function drag(ev) {
-    dragged = ev.target;
-}
+function place(slot) {
+    if (!selected || slot.innerText !== "") return;
 
-function drop(ev) {
-    ev.preventDefault();
-
-    if (ev.target.innerText !== "") return;
-
-    ev.target.appendChild(dragged);
+    slot.innerText = selected.innerText;
+    selected.style.visibility = "hidden";
+    selected = null;
 }
 
 function check() {
@@ -257,29 +216,20 @@ function check() {
 
     if (ans === q.answer) {
         current++;
-
         if (current < questions.length) {
             render();
         } else {
             showReward();
         }
-
     } else {
-        document.getElementById("status").innerText = "❌ Sai rồi! Thử lại";
-        document.getElementById("status").style.color = "red";
+        document.getElementById("status").innerText = "❌ Sai rồi!";
     }
 }
 
 function showReward() {
-    const code = "MERCK-D3-" + Math.random().toString(36).substring(2,8).toUpperCase();
-
-    document.getElementById("code").innerText = "Mã: " + code;
+    const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
+    document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
-    document.getElementById("game").innerHTML = "";
-
-    /* =========================
-       🔒 KHÓA NGƯỜI CHƠI SAU KHI HOÀN THÀNH
-    ========================== */
     localStorage.setItem("merck_played", "1");
 }
 </script>

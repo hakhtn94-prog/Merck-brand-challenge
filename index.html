@@ -13,7 +13,6 @@ body {
     text-align: center;
 }
 
-/* FULL SCREEN APP */
 .wrapper {
     min-height: 100vh;
     display: flex;
@@ -27,7 +26,7 @@ body {
     width: 100%;
     background: #0b3d91;
     color: white;
-    padding: 12px 10px;
+    padding: 12px;
 }
 
 .header h1 {
@@ -35,7 +34,6 @@ body {
     font-size: 20px;
 }
 
-/* BANNER */
 .banner {
     display: inline-block;
     background: #ffcc00;
@@ -113,7 +111,7 @@ button {
     font-weight: bold;
 }
 
-/* REWARD POPUP */
+/* REWARD */
 #reward {
     display: none;
     position: fixed;
@@ -143,8 +141,7 @@ button {
 </div>
 
 <div class="guide">
-👉 Cách chơi:<br>
-Chạm vào chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
+👉 Cách chơi: Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
 </div>
 
 <div id="game"></div>
@@ -155,20 +152,26 @@ Chạm vào chữ cái → chọn → chạm ô trống để sắp xếp đúng
 
 </div>
 
-<!-- POPUP NHẬN QUÀ -->
+<!-- REWARD POPUP -->
 <div id="reward">
     <div id="rewardBox">
+
         <h2>🎉 CHÚC MỪNG!</h2>
-        <div id="code" style="font-size:20px;color:red;font-weight:bold;"></div>
-        <p>📍 Đến Booth D3 để nhận quà</p>
+
+        <p>Đây là mã nhận thưởng của bạn</p>
+
+        <div id="code" style="font-size:22px;color:red;font-weight:bold;margin:10px 0;"></div>
+
+        <p>
+            📍 Vui lòng <b>mang mã này đến Booth D3 - Merck</b><br>
+            để đổi quà tại sự kiện 🎁
+        </p>
+
     </div>
 </div>
 
 <script>
 
-/* =========================
-   CÂU HỎI GAME
-========================= */
 const questions = [
 {
     clue: "phân tích, chất chuẩn",
@@ -199,18 +202,12 @@ const questions = [
 let current = 0;
 let selected = null;
 
-/* =========================
-   CHẶN CHƠI LẠI 1 LẦN
-========================= */
 if (localStorage.getItem("merck_played") === "1") {
     document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px'>🚫 Bạn đã chơi rồi</h2>";
 } else {
     render();
 }
 
-/* =========================
-   HIỂN THỊ GAME
-========================= */
 function render() {
     const q = questions[current];
 
@@ -239,29 +236,19 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* =========================
-   CHỌN CHỮ
-========================= */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* =========================
-   ĐẶT CHỮ VÀO Ô
-========================= */
 function place(slot) {
     if (!selected || slot.innerText !== "") return;
-
     slot.innerText = selected.innerText;
     selected.style.visibility = "hidden";
     selected = null;
 }
 
-/* =========================
-   KIỂM TRA ĐÁP ÁN
-========================= */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -271,7 +258,6 @@ function check() {
 
     if (ans === q.answer) {
         current++;
-
         if (current < questions.length) {
             render();
         } else {
@@ -287,22 +273,21 @@ function check() {
 ========================= */
 function showReward() {
 
-    // 🎯 TẠO MÃ NHẬN QUÀ NGẪU NHIÊN
-    // Format: MERCK-XXXXXX
+    // tạo mã ngẫu nhiên
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
 
-    // 📌 HIỂN THỊ MÃ CHO NGƯỜI CHƠI
+    // hiển thị mã
     document.getElementById("code").innerText = code;
 
-    // 🎉 MỞ POPUP NHẬN QUÀ
+    // mở popup
     document.getElementById("reward").style.display = "flex";
 
-    // 🔒 KHÓA CHƠI LẠI TRÊN CÙNG THIẾT BỊ
+    // khóa chơi lại
     localStorage.setItem("merck_played", "1");
 
-    // 💡 GỢI Ý NÂNG CẤP:
-    // - gửi code về server để check tại booth
-    // - hoặc scan QR để xác nhận đổi quà
+    // thông báo thêm
+    document.getElementById("status").innerText =
+        "🎁 Mang mã đến Booth D3 - Merck để nhận quà!";
 }
 
 </script>

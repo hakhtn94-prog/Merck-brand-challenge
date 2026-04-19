@@ -119,13 +119,6 @@ button {
     z-index: 999;
 }
 
-#rewardBox {
-    background:white;
-    padding:25px;
-    border-radius:12px;
-    width:300px;
-}
-
 /* 🎆 CONFETTI */
 .confetti {
     position: fixed;
@@ -179,6 +172,7 @@ button {
 <script>
 
 const questions = [
+
 {
     clue: "phân tích, chất chuẩn",
     answer: "SUPELCO",
@@ -186,13 +180,31 @@ const questions = [
     desc: "Đây là Brand chuyên cho các sản phẩm phân tích & chất chuẩn",
     letters: ["U","P","E","L","C","O"]
 },
+
 {
     clue: "nghiên cứu R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
     desc: "Đây là Brand chuyên cho các sản phẩm nghiên cứu R&D",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
+},
+
+{
+    clue: "màng lọc",
+    answer: "MILLIPORE",
+    hint: "M",
+    desc: "Đây là Brand chuyên cho các sản phẩm màng lọc & chuẩn bị mẫu",
+    letters: ["I","L","L","I","P","O","R","E"]
+},
+
+{
+    clue: "máy lọc nước",
+    answer: "MILLIQ",
+    hint: "M",
+    desc: "Đây là Brand chuyên cho hệ thống nước siêu tinh khiết",
+    letters: ["I","L","L","I","Q"]
 }
+
 ];
 
 let current = 0;
@@ -246,7 +258,6 @@ function select(el) {
 /* PLACE + RETURN */
 function toggleSlot(slot) {
 
-    // 🔄 TRẢ CHỮ VỀ KHO
     if (slot.innerText !== "") {
         document.querySelectorAll(".box").forEach(b => {
             if (b.innerText === slot.innerText && b.style.display === "none") {
@@ -257,7 +268,6 @@ function toggleSlot(slot) {
         return;
     }
 
-    // ➕ ĐẶT CHỮ
     if (!selected) return;
 
     slot.innerText = selected.innerText;
@@ -290,7 +300,7 @@ function check() {
 /* 🎆 CONFETTI */
 function startConfetti() {
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 120; i++) {
         let c = document.createElement("div");
         c.className = "confetti";
         c.style.left = Math.random() * 100 + "vw";

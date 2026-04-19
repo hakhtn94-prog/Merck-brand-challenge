@@ -98,6 +98,7 @@ body {
 /* BUTTON */
 button {
     padding: 12px 18px;
+    margin: 5px;
     background: #2196f3;
     color: white;
     border: none;
@@ -141,12 +142,13 @@ button {
 </div>
 
 <div class="guide">
-👉 Cách chơi: Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
+👉 Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
 </div>
 
 <div id="game"></div>
 
 <button onclick="check()">✔ Kiểm tra</button>
+<button onclick="restart()">🔁 Chơi lại</button>
 
 <div id="status"></div>
 
@@ -202,17 +204,15 @@ const questions = [
 let current = 0;
 let selected = null;
 
-if (localStorage.getItem("merck_played") === "1") {
-    document.body.innerHTML = "<h2 style='text-align:center;margin-top:50px'>🚫 Bạn đã chơi rồi</h2>";
-} else {
-    render();
-}
+/* KHÔNG KHÓA CHƠI - CHƠI NHIỀU LẦN */
+render();
 
+/* HIỂN THỊ GAME */
 function render() {
     const q = questions[current];
 
     let html = `
-        <div class="question">❓ Đây là brand chuyên cho: <b>${q.clue}</b></div>
+        <div class="question">❓ Đây là brand: <b>${q.clue}</b></div>
         <div class="hint">💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b></div>
 
         <div class="container">
@@ -236,19 +236,23 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
+/* CHỌN CHỮ */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
+/* ĐẶT CHỮ */
 function place(slot) {
     if (!selected || slot.innerText !== "") return;
+
     slot.innerText = selected.innerText;
     selected.style.visibility = "hidden";
     selected = null;
 }
 
+/* KIỂM TRA */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -268,26 +272,26 @@ function check() {
     }
 }
 
-/* =========================
-   🎁 HIỂN THỊ MÃ NHẬN QUÀ
-========================= */
+/* 🎁 HIỂN THỊ MÃ NHẬN QUÀ */
 function showReward() {
 
-    // tạo mã ngẫu nhiên
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
 
-    // hiển thị mã
     document.getElementById("code").innerText = code;
 
-    // mở popup
     document.getElementById("reward").style.display = "flex";
 
-    // khóa chơi lại
-    localStorage.setItem("merck_played", "1");
-
-    // thông báo thêm
     document.getElementById("status").innerText =
-        "🎁 Mang mã đến Booth D3 - Merck để nhận quà!";
+        "📍 Mang mã đến Booth D3 - Merck để nhận quà!";
+}
+
+/* 🔁 CHƠI LẠI */
+function restart() {
+    current = 0;
+    selected = null;
+    document.getElementById("status").innerText = "";
+    document.getElementById("reward").style.display = "none";
+    render();
 }
 
 </script>

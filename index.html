@@ -124,6 +124,7 @@ button {
     border-radius: 12px;
     width: 320px;
     max-width: 90%;
+    text-align: center;
 }
 
 .confetti {
@@ -153,7 +154,7 @@ button {
 </div>
 
 <div class="guide">
-👉 Chạm chữ cái → chọn → chạm ô trống
+👉 Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
 </div>
 
 <div id="game"></div>
@@ -168,7 +169,10 @@ button {
 <div id="reward">
     <div id="rewardBox">
         <h2>🎉 CHÚC MỪNG!</h2>
-        <div id="code" style="font-size:22px;color:red;font-weight:bold;"></div>
+        <p>Bạn đã hoàn thành thử thách</p>
+        <p>Mã nhận thưởng:</p>
+        <div id="code" style="font-size:22px;color:red;font-weight:bold;margin:10px 0;"></div>
+        <p>📍 Mang mã đến <b>Booth D3 - Merck</b> để nhận quà 🎁</p>
     </div>
 </div>
 
@@ -216,23 +220,20 @@ function render() {
 
     let html = `
         <div>❓ ${q.desc}</div>
-        <div>💡 <b style="color:${q.color}">${q.hint}</b></div>
+        <div>💡 Gợi ý: chữ cái đầu tiên là <b style="color:${q.color}">${q.hint}</b></div>
     `;
 
-    // 🔥 TÁCH RIÊNG SIGMAALDRICH THÀNH 2 DÒNG
     if (q.answer === "SIGMAALDRICH") {
 
         html += `<div class="container">`;
         html += `<div class="slot fixed" style="color:${q.color}">S</div>`;
 
-        // SIGMA
         for (let i = 1; i < 5; i++) {
             html += `<div class="slot" onclick="toggleSlot(this)" style="color:${q.color}"></div>`;
         }
         html += `</div>`;
 
         html += `<div class="container">`;
-        // ALDRICH
         for (let i = 5; i < q.answer.length; i++) {
             html += `<div class="slot" onclick="toggleSlot(this)" style="color:${q.color}"></div>`;
         }

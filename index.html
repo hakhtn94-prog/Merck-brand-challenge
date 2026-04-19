@@ -73,6 +73,7 @@ body {
 .slot {
     border: 2px dashed #aaa;
     background: white;
+    cursor: pointer;
 }
 
 .fixed {
@@ -130,14 +131,14 @@ button {
     position: fixed;
     width: 10px;
     height: 10px;
-    background: red;
     top: -10px;
-    animation: fall 3s linear infinite;
+    animation: fall linear forwards;
 }
 
 @keyframes fall {
     to {
         transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
     }
 }
 </style>
@@ -153,7 +154,7 @@ button {
 </div>
 
 <div class="guide">
-👉 Chạm chữ cái → đặt vào ô trống → chạm lại để trả về kho
+👉 Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
 </div>
 
 <div id="game"></div>
@@ -201,6 +202,7 @@ render();
 
 /* RENDER */
 function render() {
+
     selected = null;
     const q = questions[current];
 
@@ -234,30 +236,28 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* CHỌN CHỮ */
+/* SELECT */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* ĐẶT / TRẢ CHỮ */
+/* PLACE + RETURN */
 function toggleSlot(slot) {
 
+    // 🔄 TRẢ CHỮ VỀ KHO
     if (slot.innerText !== "") {
-        // trả lại kho
-        const letter = slot.innerText;
-
         document.querySelectorAll(".box").forEach(b => {
-            if (b.innerText === letter && b.style.display === "none") {
+            if (b.innerText === slot.innerText && b.style.display === "none") {
                 b.style.display = "flex";
             }
         });
-
         slot.innerText = "";
         return;
     }
 
+    // ➕ ĐẶT CHỮ
     if (!selected) return;
 
     slot.innerText = selected.innerText;
@@ -266,8 +266,9 @@ function toggleSlot(slot) {
     selected = null;
 }
 
-/* KIỂM TRA */
+/* CHECK */
 function check() {
+
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
 
@@ -286,9 +287,10 @@ function check() {
     }
 }
 
-/* 🎆 PHÁO HOA */
+/* 🎆 CONFETTI */
 function startConfetti() {
-    for (let i = 0; i < 80; i++) {
+
+    for (let i = 0; i < 100; i++) {
         let c = document.createElement("div");
         c.className = "confetti";
         c.style.left = Math.random() * 100 + "vw";
@@ -300,7 +302,7 @@ function startConfetti() {
     }
 }
 
-/* 🎁 REWARD */
+/* REWARD */
 function showReward() {
 
     startConfetti();
@@ -311,7 +313,7 @@ function showReward() {
     document.getElementById("reward").style.display = "flex";
 }
 
-/* RESET */
+/* RESTART */
 function restart() {
     current = 0;
     selected = null;

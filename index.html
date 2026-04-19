@@ -168,6 +168,9 @@ button {
 
 <script>
 
+/* 🔥 FIX LỖI CŨ: xóa toàn bộ trạng thái lưu trình duyệt */
+localStorage.clear();
+
 const questions = [
 {
     clue: "phân tích, chất chuẩn",
@@ -200,16 +203,12 @@ let selected = null;
 
 render();
 
-/* =========================
-   RESET GAME CLEAN
-========================= */
+/* RESET */
 function resetBoard() {
     selected = null;
 }
 
-/* =========================
-   RENDER GAME
-========================= */
+/* RENDER */
 function render() {
     resetBoard();
 
@@ -240,18 +239,14 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* =========================
-   SELECT LETTER
-========================= */
+/* SELECT */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* =========================
-   PLACE LETTER
-========================= */
+/* PLACE */
 function place(slot) {
     if (!selected || slot.innerText !== "") return;
 
@@ -260,9 +255,7 @@ function place(slot) {
     selected = null;
 }
 
-/* =========================
-   CHECK ANSWER
-========================= */
+/* CHECK */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -282,9 +275,7 @@ function check() {
     }
 }
 
-/* =========================
-   SHOW REWARD
-========================= */
+/* REWARD */
 function showReward() {
 
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
@@ -296,9 +287,7 @@ function showReward() {
         "📍 Mang mã đến Booth D3 - Merck để nhận quà!";
 }
 
-/* =========================
-   RESTART GAME (FIX FULL RESET)
-========================= */
+/* RESTART (CHƠI LẠI HOÀN TOÀN) */
 function restart() {
     current = 0;
     selected = null;

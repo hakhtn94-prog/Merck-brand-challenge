@@ -75,17 +75,10 @@ body {
     background: white;
 }
 
-.fixed {
-    background: #c8f7c5;
-    border: 2px solid green;
-    font-weight: bold;
-}
-
 .box {
     background: #e8f0ff;
     border: 2px solid #333;
     cursor: pointer;
-    user-select: none;
 }
 
 .box.selected {
@@ -107,17 +100,36 @@ button {
     font-weight: bold;
 }
 
+/* =========================
+   FIX REWARD BOX FULL SCREEN
+========================= */
 #reward {
     display: none;
     position: fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.7);
-    justify-content:center;
-    align-items:center;
-    z-index: 999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.75);
+
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
 }
 
+/* 🔥 BOX TRẮNG QUAN TRỌNG */
+#rewardBox {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 300px;
+    max-width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* CONFETTI */
 .confetti {
     position: fixed;
     width: 8px;
@@ -171,31 +183,27 @@ button {
 
 const questions = [
 {
-    clue: "phân tích, chất chuẩn",
+    desc: "Brand phân tích & chất chuẩn",
     answer: "SUPELCO",
     hint: "S",
-    desc: "Brand phân tích & chất chuẩn",
     letters: ["U","P","E","L","C","O"]
 },
 {
-    clue: "nghiên cứu R&D",
+    desc: "Brand nghiên cứu R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
-    desc: "Brand nghiên cứu R&D",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
 },
 {
-    clue: "màng lọc",
+    desc: "Brand màng lọc & chuẩn bị mẫu",
     answer: "MILLIPORE",
     hint: "M",
-    desc: "Brand lọc & chuẩn bị mẫu",
     letters: ["I","L","L","I","P","O","R","E"]
 },
 {
-    clue: "nước siêu tinh khiết",
+    desc: "Hệ thống nước siêu tinh khiết",
     answer: "MILLIQ",
     hint: "M",
-    desc: "Hệ thống nước siêu sạch",
     letters: ["I","L","L","I","Q"]
 }
 ];
@@ -205,11 +213,9 @@ let selected = null;
 
 render();
 
-/* RESET */
+/* ================= RENDER ================= */
 function render() {
-
     selected = null;
-
     const q = questions[current];
 
     let html = `
@@ -217,7 +223,7 @@ function render() {
         <div class="hint">💡 Gợi ý: <b>${q.hint}</b></div>
 
         <div class="container">
-            <div class="slot fixed">${q.hint}</div>
+            <div class="slot">${q.hint}</div>
     `;
 
     for (let i = 1; i < q.answer.length; i++) {
@@ -229,7 +235,7 @@ function render() {
     let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
 
     shuffled.forEach(l => {
-        html += `<div class="box" data-used="0" onclick="select(this)">${l}</div>`;
+        html += `<div class="box" onclick="select(this)">${l}</div>`;
     });
 
     html += `</div>`;
@@ -237,25 +243,22 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* SELECT */
+/* ================= SELECT ================= */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* PLACE / RETURN FIX (KHÔNG DÙNG VISIBILITY NỮA) */
+/* ================= PLACE / RETURN ================= */
 function toggleSlot(slot) {
 
     if (slot.innerText !== "") {
-
         document.querySelectorAll(".box").forEach(b => {
-            if (b.innerText === slot.innerText && b.dataset.used === "1") {
-                b.dataset.used = "0";
-                b.style.opacity = "1";
+            if (b.innerText === slot.innerText) {
+                b.style.display = "flex";
             }
         });
-
         slot.innerText = "";
         return;
     }
@@ -263,15 +266,13 @@ function toggleSlot(slot) {
     if (!selected) return;
 
     slot.innerText = selected.innerText;
-    selected.dataset.used = "1";
-    selected.style.opacity = "0.3";
+    selected.style.display = "none";
     selected.classList.remove("selected");
     selected = null;
 }
 
-/* CHECK */
+/* ================= CHECK ================= */
 function check() {
-
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
 
@@ -279,7 +280,6 @@ function check() {
     slots.forEach(s => ans += s.innerText);
 
     if (ans === q.answer) {
-
         current++;
 
         if (current >= questions.length) {
@@ -287,13 +287,12 @@ function check() {
         } else {
             render();
         }
-
     } else {
         document.getElementById("status").innerText = "❌ Sai rồi!";
     }
 }
 
-/* CONFETTI */
+/* ================= CONFETTI ================= */
 function confetti() {
     for (let i = 0; i < 120; i++) {
         let c = document.createElement("div");
@@ -306,15 +305,16 @@ function confetti() {
     }
 }
 
-/* REWARD */
+/* ================= REWARD ================= */
 function showReward() {
     confetti();
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
+
     document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
 }
 
-/* RESTART */
+/* ================= RESTART ================= */
 function restart() {
     current = 0;
     selected = null;

@@ -57,12 +57,11 @@ body {
     justify-content: center;
     flex-wrap: nowrap;
     gap: 6px;
-    margin: 10px 0;
+    margin: 6px 0;
     width: 100%;
     overflow-x: auto;
 }
 
-/* 🔥 cho phép xuống dòng trong ô */
 .slot, .box {
     width: 9vw;
     height: 9vw;
@@ -71,15 +70,11 @@ body {
     max-width: 45px;
     max-height: 45px;
 
-    font-size: 3.5vw;
-    text-align: center;
-    line-height: 1.1;
-
+    font-size: 4vw;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    white-space: pre-line; /* QUAN TRỌNG */
 }
 
 .slot {
@@ -158,7 +153,7 @@ button {
 </div>
 
 <div class="guide">
-👉 Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
+👉 Chạm chữ cái → chọn → chạm ô trống
 </div>
 
 <div id="game"></div>
@@ -220,25 +215,51 @@ function render() {
     const q = questions[current];
 
     let html = `
-        <div class="question">❓ ${q.desc}</div>
-        <div class="hint">💡 Gợi ý: <b style="color:${q.color}">${q.hint}</b></div>
-        <div class="container">
-            <div class="slot fixed" style="color:${q.color}">${q.hint}</div>
+        <div>❓ ${q.desc}</div>
+        <div>💡 <b style="color:${q.color}">${q.hint}</b></div>
     `;
 
-    for (let i = 1; i < q.answer.length; i++) {
-        html += `<div class="slot" style="color:${q.color}" onclick="toggleSlot(this)"></div>`;
+    // 🔥 TÁCH RIÊNG SIGMAALDRICH THÀNH 2 DÒNG
+    if (q.answer === "SIGMAALDRICH") {
+
+        html += `<div class="container">`;
+        html += `<div class="slot fixed" style="color:${q.color}">S</div>`;
+
+        // SIGMA
+        for (let i = 1; i < 5; i++) {
+            html += `<div class="slot" onclick="toggleSlot(this)" style="color:${q.color}"></div>`;
+        }
+        html += `</div>`;
+
+        html += `<div class="container">`;
+        // ALDRICH
+        for (let i = 5; i < q.answer.length; i++) {
+            html += `<div class="slot" onclick="toggleSlot(this)" style="color:${q.color}"></div>`;
+        }
+        html += `</div>`;
+
+    } else {
+
+        html += `<div class="container">`;
+        html += `<div class="slot fixed" style="color:${q.color}">${q.hint}</div>`;
+
+        for (let i = 1; i < q.answer.length; i++) {
+            html += `<div class="slot" onclick="toggleSlot(this)" style="color:${q.color}"></div>`;
+        }
+
+        html += `</div>`;
     }
 
-    html += `</div><div class="container">`;
+    html += `<div class="container">`;
 
     let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
 
     shuffled.forEach(l => {
-        html += `<div class="box" style="color:${q.color}" onclick="select(this)">${l}</div>`;
+        html += `<div class="box" onclick="select(this)" style="color:${q.color}">${l}</div>`;
     });
 
     html += `</div>`;
+
     document.getElementById("game").innerHTML = html;
 }
 
@@ -253,9 +274,7 @@ function toggleSlot(slot) {
 
     if (slot.innerText !== "") {
         boxes.forEach(b => {
-            if (b.innerText === slot.innerText.replace("\n","")) {
-                b.style.display = "flex";
-            }
+            if (b.innerText === slot.innerText) b.style.display = "flex";
         });
         slot.innerText = "";
         return;
@@ -263,16 +282,7 @@ function toggleSlot(slot) {
 
     if (!selected) return;
 
-    let text = selected.innerText;
-
-    // 🔥 CHỈ ÁP DỤNG CHO SIGMAALDRICH
-    if (questions[current].answer === "SIGMAALDRICH") {
-        if (slot.innerText === "" && document.querySelectorAll(".slot")[1] === slot) {
-            text = "SIGMA\nALDRICH";
-        }
-    }
-
-    slot.innerText = text;
+    slot.innerText = selected.innerText;
     selected.style.display = "none";
     selected.classList.remove("selected");
     selected = null;
@@ -283,7 +293,7 @@ function check() {
     const slots = document.querySelectorAll(".slot");
 
     let ans = "";
-    slots.forEach(s => ans += s.innerText.replace("\n",""));
+    slots.forEach(s => ans += s.innerText);
 
     if (ans === q.answer) {
         current++;

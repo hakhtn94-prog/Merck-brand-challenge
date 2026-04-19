@@ -52,18 +52,29 @@ body {
     font-size: 14px;
 }
 
+/* ✅ CHỈNH PHẦN NÀY */
 .container {
     display: flex;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: nowrap; /* luôn 1 dòng */
+    gap: 6px;
     margin: 10px 0;
+    width: 100%;
+    overflow-x: auto; /* quá dài thì kéo ngang */
 }
 
+/* ✅ CHỈNH KÍCH THƯỚC RESPONSIVE */
 .slot, .box {
-    width: 45px;
-    height: 45px;
-    font-size: 20px;
+    width: 9vw;
+    height: 9vw;
+    min-width: 34px;
+    min-height: 34px;
+    max-width: 45px;
+    max-height: 45px;
+
+    font-size: 4vw;
+    max-font-size: 20px;
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -117,7 +128,6 @@ button {
     z-index: 9999;
 }
 
-/* BOX TRẮNG CHIẾN THẮNG */
 #rewardBox {
     background: white;
     padding: 25px;
@@ -128,7 +138,6 @@ button {
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* CONFETTI */
 .confetti {
     position: fixed;
     width: 8px;
@@ -168,7 +177,6 @@ button {
 
 </div>
 
-<!-- REWARD -->
 <div id="reward">
     <div id="rewardBox">
         <h2>🎉 CHÚC MỪNG!</h2>
@@ -180,31 +188,35 @@ button {
 </div>
 
 <script>
-
+// giữ nguyên toàn bộ JS của bạn
 const questions = [
 {
-    desc: "Đây là brand chuyên cho các sản phẩm phân tích, chất chuẩn",
+    desc: "Đây là brand của sản phẩm chuyên phân tích, chất chuẩn",
     answer: "SUPELCO",
     hint: "S",
-    letters: ["U","P","E","L","C","O"]
+    letters: ["U","P","E","L","C","O"],
+    color: "green"
 },
 {
-    desc: "Đây là brand chuyên cho các sản phẩm hóa chất nghiên cứu cơ bản, R&D",
+    desc: "Đây là brand của sản phẩm chuyên hóa chất nghiên cứu cơ bản, R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
-    letters: ["I","G","M","A","A","L","D","R","I","C","H"]
+    letters: ["I","G","M","A","A","L","D","R","I","C","H"],
+    color: "red"
 },
 {
-    desc: "Đây là brand chuyên cho các sản phẩm màng lọc, kiểm soát vi sinh",
+    desc: "Đây là brand của sản phẩm chuyên màng lọc, kiểm soát vi sinh",
     answer: "MILLIPORE",
     hint: "M",
-    letters: ["I","L","L","I","P","O","R","E"]
+    letters: ["I","L","L","I","P","O","R","E"],
+    color: "blue"
 },
 {
-    desc: "Đây là brand chuyên cho hệ thống lọc nước siêu tinh khiết",
+    desc: "Đây là brand của sản phẩm chuyên hệ thống lọc nước siêu tinh khiết",
     answer: "MILLIQ",
     hint: "M",
-    letters: ["I","L","L","I","Q"]
+    letters: ["I","L","L","I","Q"],
+    color: "deepskyblue"
 }
 ];
 
@@ -213,24 +225,19 @@ let selected = null;
 
 render();
 
-/* ================= RENDER ================= */
 function render() {
     selected = null;
     const q = questions[current];
 
     let html = `
         <div class="question">❓ ${q.desc}</div>
-
-        <div class="hint">
-            💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b>
-        </div>
-
+        <div class="hint">💡 Gợi ý: chữ cái đầu tiên là <b style="color:${q.color}">${q.hint}</b></div>
         <div class="container">
-            <div class="slot fixed">${q.hint}</div>
+            <div class="slot fixed" style="color:${q.color}">${q.hint}</div>
     `;
 
     for (let i = 1; i < q.answer.length; i++) {
-        html += `<div class="slot" onclick="toggleSlot(this)"></div>`;
+        html += `<div class="slot" style="color:${q.color}" onclick="toggleSlot(this)"></div>`;
     }
 
     html += `</div><div class="container">`;
@@ -238,27 +245,22 @@ function render() {
     let shuffled = [...q.letters].sort(() => Math.random() - 0.5);
 
     shuffled.forEach(l => {
-        html += `<div class="box" onclick="select(this)">${l}</div>`;
+        html += `<div class="box" style="color:${q.color}" onclick="select(this)">${l}</div>`;
     });
 
     html += `</div>`;
-
     document.getElementById("game").innerHTML = html;
 }
 
-/* ================= SELECT ================= */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* ================= PLACE / RETURN FIX ================= */
 function toggleSlot(slot) {
-
     const boxes = document.querySelectorAll(".box");
 
-    // nếu slot có chữ → trả về kho
     if (slot.innerText !== "") {
         boxes.forEach(b => {
             if (b.innerText === slot.innerText) {
@@ -269,7 +271,6 @@ function toggleSlot(slot) {
         return;
     }
 
-    // đặt chữ mới
     if (!selected) return;
 
     slot.innerText = selected.innerText;
@@ -278,7 +279,6 @@ function toggleSlot(slot) {
     selected = null;
 }
 
-/* ================= CHECK ================= */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -288,18 +288,13 @@ function check() {
 
     if (ans === q.answer) {
         current++;
-
-        if (current >= questions.length) {
-            showReward();
-        } else {
-            render();
-        }
+        if (current >= questions.length) showReward();
+        else render();
     } else {
         document.getElementById("status").innerText = "❌ Sai rồi!";
     }
 }
 
-/* ================= CONFETTI ================= */
 function confetti() {
     for (let i = 0; i < 120; i++) {
         let c = document.createElement("div");
@@ -312,17 +307,13 @@ function confetti() {
     }
 }
 
-/* ================= REWARD ================= */
 function showReward() {
     confetti();
-
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
-
     document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
 }
 
-/* ================= RESTART ================= */
 function restart() {
     current = 0;
     selected = null;
@@ -330,7 +321,6 @@ function restart() {
     document.getElementById("reward").style.display = "none";
     render();
 }
-
 </script>
 
 </body>

@@ -73,7 +73,6 @@ body {
 .slot {
     border: 2px dashed #aaa;
     background: white;
-    cursor: pointer;
 }
 
 .fixed {
@@ -119,11 +118,10 @@ button {
     z-index: 999;
 }
 
-/* 🎆 CONFETTI */
 .confetti {
     position: fixed;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     top: -10px;
     animation: fall linear forwards;
 }
@@ -172,39 +170,34 @@ button {
 <script>
 
 const questions = [
-
 {
     clue: "phân tích, chất chuẩn",
     answer: "SUPELCO",
     hint: "S",
-    desc: "Đây là Brand chuyên cho các sản phẩm phân tích & chất chuẩn",
+    desc: "Brand phân tích & chất chuẩn",
     letters: ["U","P","E","L","C","O"]
 },
-
 {
     clue: "nghiên cứu R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
-    desc: "Đây là Brand chuyên cho các sản phẩm nghiên cứu R&D",
+    desc: "Brand nghiên cứu R&D",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
 },
-
 {
     clue: "màng lọc",
     answer: "MILLIPORE",
     hint: "M",
-    desc: "Đây là Brand chuyên cho các sản phẩm màng lọc & chuẩn bị mẫu",
+    desc: "Brand lọc & chuẩn bị mẫu",
     letters: ["I","L","L","I","P","O","R","E"]
 },
-
 {
-    clue: "máy lọc nước",
+    clue: "nước siêu tinh khiết",
     answer: "MILLIQ",
     hint: "M",
-    desc: "Đây là Brand chuyên cho hệ thống nước siêu tinh khiết",
+    desc: "Hệ thống nước siêu sạch",
     letters: ["I","L","L","I","Q"]
 }
-
 ];
 
 let current = 0;
@@ -212,20 +205,20 @@ let selected = null;
 
 render();
 
+/* RESET SLOT PROPER */
+function resetSelection() {
+    selected = null;
+}
+
 /* RENDER */
 function render() {
+    resetSelection();
 
-    selected = null;
     const q = questions[current];
 
     let html = `
-        <div class="question">
-            ❓ ${q.desc}
-        </div>
-
-        <div class="hint">
-            💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b>
-        </div>
+        <div class="question">❓ ${q.desc}</div>
+        <div class="hint">💡 Gợi ý: <b>${q.hint}</b></div>
 
         <div class="container">
             <div class="slot fixed">${q.hint}</div>
@@ -255,13 +248,16 @@ function select(el) {
     el.classList.add("selected");
 }
 
-/* PLACE + RETURN */
+/* PLACE + RETURN FIXED */
 function toggleSlot(slot) {
 
+    const boxes = document.querySelectorAll(".box");
+
+    // trả ký tự về
     if (slot.innerText !== "") {
-        document.querySelectorAll(".box").forEach(b => {
-            if (b.innerText === slot.innerText && b.style.display === "none") {
-                b.style.display = "flex";
+        boxes.forEach(b => {
+            if (b.innerText === slot.innerText && b.style.visibility === "hidden") {
+                b.style.visibility = "visible";
             }
         });
         slot.innerText = "";
@@ -271,12 +267,12 @@ function toggleSlot(slot) {
     if (!selected) return;
 
     slot.innerText = selected.innerText;
-    selected.style.display = "none";
+    selected.style.visibility = "hidden";
     selected.classList.remove("selected");
     selected = null;
 }
 
-/* CHECK */
+/* CHECK FIXED */
 function check() {
 
     const q = questions[current];
@@ -286,20 +282,22 @@ function check() {
     slots.forEach(s => ans += s.innerText);
 
     if (ans === q.answer) {
+
         current++;
-        if (current < questions.length) {
-            render();
-        } else {
+
+        if (current >= questions.length) {
             showReward();
+        } else {
+            render();
         }
+
     } else {
         document.getElementById("status").innerText = "❌ Sai rồi!";
     }
 }
 
-/* 🎆 CONFETTI */
-function startConfetti() {
-
+/* CONFETTI */
+function confetti() {
     for (let i = 0; i < 120; i++) {
         let c = document.createElement("div");
         c.className = "confetti";
@@ -307,28 +305,24 @@ function startConfetti() {
         c.style.background = `hsl(${Math.random()*360},100%,50%)`;
         c.style.animationDuration = (Math.random()*2+2) + "s";
         document.body.appendChild(c);
-
         setTimeout(() => c.remove(), 4000);
     }
 }
 
 /* REWARD */
 function showReward() {
-
-    startConfetti();
-
+    confetti();
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
-
     document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
 }
 
-/* RESTART */
+/* RESTART FIX FULL RESET */
 function restart() {
     current = 0;
     selected = null;
-    document.getElementById("reward").style.display = "none";
     document.getElementById("status").innerText = "";
+    document.getElementById("reward").style.display = "none";
     render();
 }
 

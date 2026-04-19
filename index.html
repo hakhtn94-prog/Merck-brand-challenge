@@ -115,6 +115,7 @@ button {
     background: rgba(0,0,0,0.7);
     justify-content:center;
     align-items:center;
+    z-index: 999;
 }
 
 #rewardBox {
@@ -122,6 +123,22 @@ button {
     padding:25px;
     border-radius:12px;
     width:300px;
+}
+
+/* 🎆 CONFETTI */
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: red;
+    top: -10px;
+    animation: fall 3s linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh) rotate(720deg);
+    }
 }
 </style>
 </head>
@@ -132,11 +149,11 @@ button {
 
 <div class="header">
     <h1>🎮 Merck Brand Challenge</h1>
-    <div class="banner">🎁 Nhận quà hấp dẫn tại Booth D3 - Merck</div>
+    <div class="banner">🎁 Nhận quà tại Booth D3 - Merck</div>
 </div>
 
 <div class="guide">
-👉 Chạm chữ cái → chọn → chạm ô trống để sắp xếp đúng đáp án
+👉 Chạm chữ cái → đặt vào ô trống → chạm lại để trả về kho
 </div>
 
 <div id="game"></div>
@@ -151,50 +168,29 @@ button {
 <!-- REWARD -->
 <div id="reward">
     <div id="rewardBox">
-
         <h2>🎉 CHÚC MỪNG!</h2>
-
-        <p>Mã nhận thưởng của bạn:</p>
-
+        <p>Mã nhận thưởng:</p>
         <div id="code" style="font-size:22px;color:red;font-weight:bold;margin:10px 0;"></div>
-
-        <p>
-            📍 Vui lòng mang mã đến <b>Booth D3 - Merck</b><br>
-            để đổi quà 🎁
-        </p>
-
+        <p>📍 Mang mã đến <b>Booth D3 - Merck</b> để nhận quà 🎁</p>
     </div>
 </div>
 
 <script>
-
-/* 🔥 FIX LỖI CŨ: xóa toàn bộ trạng thái lưu trình duyệt */
-localStorage.clear();
 
 const questions = [
 {
     clue: "phân tích, chất chuẩn",
     answer: "SUPELCO",
     hint: "S",
+    desc: "Đây là Brand chuyên cho các sản phẩm phân tích & chất chuẩn",
     letters: ["U","P","E","L","C","O"]
 },
 {
     clue: "nghiên cứu R&D",
     answer: "SIGMAALDRICH",
     hint: "S",
+    desc: "Đây là Brand chuyên cho các sản phẩm nghiên cứu R&D",
     letters: ["I","G","M","A","A","L","D","R","I","C","H"]
-},
-{
-    clue: "màng lọc, chuẩn bị mẫu",
-    answer: "MILLIPORE",
-    hint: "M",
-    letters: ["I","L","L","I","P","O","R","E"]
-},
-{
-    clue: "máy lọc nước",
-    answer: "MILLIQ",
-    hint: "M",
-    letters: ["I","L","L","I","Q"]
 }
 ];
 
@@ -203,27 +199,26 @@ let selected = null;
 
 render();
 
-/* RESET */
-function resetBoard() {
-    selected = null;
-}
-
 /* RENDER */
 function render() {
-    resetBoard();
-
+    selected = null;
     const q = questions[current];
 
     let html = `
-        <div class="question">❓ Đây là brand: <b>${q.clue}</b></div>
-        <div class="hint">💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b></div>
+        <div class="question">
+            ❓ ${q.desc}
+        </div>
+
+        <div class="hint">
+            💡 Gợi ý: chữ cái đầu tiên là <b>${q.hint}</b>
+        </div>
 
         <div class="container">
             <div class="slot fixed">${q.hint}</div>
     `;
 
     for (let i = 1; i < q.answer.length; i++) {
-        html += `<div class="slot" onclick="place(this)"></div>`;
+        html += `<div class="slot" onclick="toggleSlot(this)"></div>`;
     }
 
     html += `</div><div class="container">`;
@@ -239,23 +234,39 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* SELECT */
+/* CHỌN CHỮ */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* PLACE */
-function place(slot) {
-    if (!selected || slot.innerText !== "") return;
+/* ĐẶT / TRẢ CHỮ */
+function toggleSlot(slot) {
+
+    if (slot.innerText !== "") {
+        // trả lại kho
+        const letter = slot.innerText;
+
+        document.querySelectorAll(".box").forEach(b => {
+            if (b.innerText === letter && b.style.display === "none") {
+                b.style.display = "flex";
+            }
+        });
+
+        slot.innerText = "";
+        return;
+    }
+
+    if (!selected) return;
 
     slot.innerText = selected.innerText;
-    selected.style.visibility = "hidden";
+    selected.style.display = "none";
+    selected.classList.remove("selected");
     selected = null;
 }
 
-/* CHECK */
+/* KIỂM TRA */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -275,24 +286,37 @@ function check() {
     }
 }
 
-/* REWARD */
+/* 🎆 PHÁO HOA */
+function startConfetti() {
+    for (let i = 0; i < 80; i++) {
+        let c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+        c.style.animationDuration = (Math.random()*2+2) + "s";
+        document.body.appendChild(c);
+
+        setTimeout(() => c.remove(), 4000);
+    }
+}
+
+/* 🎁 REWARD */
 function showReward() {
+
+    startConfetti();
 
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
 
     document.getElementById("code").innerText = code;
     document.getElementById("reward").style.display = "flex";
-
-    document.getElementById("status").innerText =
-        "📍 Mang mã đến Booth D3 - Merck để nhận quà!";
 }
 
-/* RESTART (CHƠI LẠI HOÀN TOÀN) */
+/* RESET */
 function restart() {
     current = 0;
     selected = null;
-    document.getElementById("status").innerText = "";
     document.getElementById("reward").style.display = "none";
+    document.getElementById("status").innerText = "";
     render();
 }
 

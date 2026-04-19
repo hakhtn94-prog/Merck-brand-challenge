@@ -21,7 +21,6 @@ body {
     padding: 12px;
 }
 
-/* HEADER */
 .header {
     width: 100%;
     background: #0b3d91;
@@ -44,7 +43,6 @@ body {
     font-weight: bold;
 }
 
-/* GUIDE */
 .guide {
     background: #fff3cd;
     border: 1px solid #ffeeba;
@@ -54,7 +52,6 @@ body {
     font-size: 14px;
 }
 
-/* GAME */
 .container {
     display: flex;
     justify-content: center;
@@ -95,7 +92,6 @@ body {
     background: #ffcc80;
 }
 
-/* BUTTON */
 button {
     padding: 12px 18px;
     margin: 5px;
@@ -106,13 +102,11 @@ button {
     font-size: 16px;
 }
 
-/* STATUS */
 #status {
     margin-top: 10px;
     font-weight: bold;
 }
 
-/* REWARD */
 #reward {
     display: none;
     position: fixed;
@@ -154,19 +148,19 @@ button {
 
 </div>
 
-<!-- REWARD POPUP -->
+<!-- REWARD -->
 <div id="reward">
     <div id="rewardBox">
 
         <h2>🎉 CHÚC MỪNG!</h2>
 
-        <p>Đây là mã nhận thưởng của bạn</p>
+        <p>Mã nhận thưởng của bạn:</p>
 
         <div id="code" style="font-size:22px;color:red;font-weight:bold;margin:10px 0;"></div>
 
         <p>
-            📍 Vui lòng <b>mang mã này đến Booth D3 - Merck</b><br>
-            để đổi quà tại sự kiện 🎁
+            📍 Vui lòng mang mã đến <b>Booth D3 - Merck</b><br>
+            để đổi quà 🎁
         </p>
 
     </div>
@@ -204,11 +198,21 @@ const questions = [
 let current = 0;
 let selected = null;
 
-/* KHÔNG KHÓA CHƠI - CHƠI NHIỀU LẦN */
 render();
 
-/* HIỂN THỊ GAME */
+/* =========================
+   RESET GAME CLEAN
+========================= */
+function resetBoard() {
+    selected = null;
+}
+
+/* =========================
+   RENDER GAME
+========================= */
 function render() {
+    resetBoard();
+
     const q = questions[current];
 
     let html = `
@@ -236,14 +240,18 @@ function render() {
     document.getElementById("game").innerHTML = html;
 }
 
-/* CHỌN CHỮ */
+/* =========================
+   SELECT LETTER
+========================= */
 function select(el) {
     document.querySelectorAll(".box").forEach(b => b.classList.remove("selected"));
     selected = el;
     el.classList.add("selected");
 }
 
-/* ĐẶT CHỮ */
+/* =========================
+   PLACE LETTER
+========================= */
 function place(slot) {
     if (!selected || slot.innerText !== "") return;
 
@@ -252,7 +260,9 @@ function place(slot) {
     selected = null;
 }
 
-/* KIỂM TRA */
+/* =========================
+   CHECK ANSWER
+========================= */
 function check() {
     const q = questions[current];
     const slots = document.querySelectorAll(".slot");
@@ -272,20 +282,23 @@ function check() {
     }
 }
 
-/* 🎁 HIỂN THỊ MÃ NHẬN QUÀ */
+/* =========================
+   SHOW REWARD
+========================= */
 function showReward() {
 
     const code = "MERCK-" + Math.random().toString(36).substring(2,8).toUpperCase();
 
     document.getElementById("code").innerText = code;
-
     document.getElementById("reward").style.display = "flex";
 
     document.getElementById("status").innerText =
         "📍 Mang mã đến Booth D3 - Merck để nhận quà!";
 }
 
-/* 🔁 CHƠI LẠI */
+/* =========================
+   RESTART GAME (FIX FULL RESET)
+========================= */
 function restart() {
     current = 0;
     selected = null;
